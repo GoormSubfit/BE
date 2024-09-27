@@ -32,7 +32,12 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
-        
+
+      - name: Set YML
+        run: |
+          echo "${{ secrets.SECRET_YML }}" | base64 --decode > src/main/resources/secret.yml
+          find src
+
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
