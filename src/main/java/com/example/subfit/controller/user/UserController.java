@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
@@ -44,8 +45,11 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserRegistrationDto userRegistrationDto) {
-        userService.registerUser(userRegistrationDto);
+    public ResponseEntity<Map<String, String>> registerUser(
+            @ModelAttribute UserRegistrationDto userRegistrationDto,
+            @RequestParam(value = "profileImage", required = false) MultipartFile profileImageFile) {
+
+        userService.registerUser(userRegistrationDto, profileImageFile);
         Map<String, String> response = new HashMap<>();
         response.put("message", "회원가입 되었습니다");
         return ResponseEntity.ok().body(response);

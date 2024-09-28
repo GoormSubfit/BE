@@ -42,7 +42,7 @@ public class User {
     @Column(name = "card", nullable = false)
     private Card card;  // 카드 (Enum)
 
-    @Column(name = "profile_image", length = 100)
+    @Column(name = "profile_image", length = 1000)
     private String profileImage;  // 프로필 사진
 }
 
