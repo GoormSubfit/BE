@@ -82,6 +82,10 @@ public class UserService implements UserDetailsService {
         return amazonS3.getUrl(bucketName, fileName).toString();
     }
 
+    public User getUserByUserId(String userId) {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+    }
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {

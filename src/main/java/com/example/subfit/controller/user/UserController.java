@@ -2,6 +2,7 @@ package com.example.subfit.controller.user;
 
 import com.example.subfit.dto.user.UserLoginDto;
 import com.example.subfit.dto.user.UserRegistrationDto;
+import com.example.subfit.entity.user.User;
 import com.example.subfit.security.JwtTokenProvider;
 import com.example.subfit.service.user.UserService;
 import org.springframework.http.HttpStatus;
@@ -69,6 +70,19 @@ public class UserController {
         response.put("token", token);
 
         return ResponseEntity.ok().body(response);
+    }
+    @GetMapping("/profile")
+    public ResponseEntity<Map<String, Object>> getUserProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId = authentication.getName();
+
+        User user = userService.getUserByUserId(userId);
+        Map<String, Object> profileData = new HashMap<>();
+        profileData.put("profileImage", user.getProfileImage());
+        profileData.put("name", user.getName());
+        profileData.put("job", user.getJob());
+
+        return ResponseEntity.ok(profileData);
     }
 
 }
