@@ -16,9 +16,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RecommendationService {
@@ -63,10 +65,20 @@ public class RecommendationService {
 
             // gpt 프롬프트 생성
             StringBuilder prompt = new StringBuilder();
+            // 사용자 대답
+            StringBuilder userAnswers = new StringBuilder();
             prompt.append("아래가 사용자의 서비스 이용 질문과 질문에 대한 답이야:\n");
 
-            for (RecommendationRequestDto.QuestionAnswerDto qa : requestDto.getQuestionAnswers()) {
+            List<RecommendationRequestDto.QuestionAnswerDto> questionAnswers = requestDto.getQuestionAnswers();
+            for (int i = 0; i < questionAnswers.size(); i++) {
+                RecommendationRequestDto.QuestionAnswerDto qa = questionAnswers.get(i);
                 prompt.append(qa.getQuestion()).append(": ").append(qa.getAnswer()).append("\n");
+
+                // 마지막 답변 뒤에는 /가 들어가지 않도록 처리
+                userAnswers.append(qa.getAnswer());
+                if (i < questionAnswers.size() - 1) {
+                    userAnswers.append(" / ");
+                }
             }
 
             switch (requestDto.getType()) {
@@ -116,18 +128,21 @@ public class RecommendationService {
                     .benefit1(benefit1)
                     .benefit2(benefit2)
                     .benefit3(benefit3)
+                    .userAnswer(userAnswers.toString().trim())
                     .createdAt(LocalDateTime.now())
                     .build();
             recommendationResultRepository.save(recommendationResult);
 
             // RecommendationResponseDto 생성 및 반환
             RecommendationResponseDto responseDto = RecommendationResponseDto.builder()
+                    .id(recommendationResult.getId())
                     .type(requestDto.getType())
                     .serviceName(recommendedService)
                     .price(price)
                     .benefit1(benefit1)
                     .benefit2(benefit2)
                     .benefit3(benefit3)
+                    .userAnswer(userAnswers.toString().trim())
                     .createdAt(LocalDateTime.now())
                     .build();
 
@@ -138,6 +153,67 @@ public class RecommendationService {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseBuilder.databaseError();  // 일반적인 오류는 500
+        }
+    }
+
+    public ResponseEntity<List<RecommendationResponseDto>> getRecommendationList() {
+        try {
+            // 인증된 사용자
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);  // 인증되지 않은 경우
+            }
+
+            User user = userService.getUserByUserId(authentication.getName());
+
+            List<RecommendationResult> recommendations = recommendationResultRepository.findByUser(user);
+            List<RecommendationResponseDto> responseDtos = recommendations.stream()
+                    .map(recommendation -> RecommendationResponseDto.builder()
+                            .id(recommendation.getId())
+                            .type(recommendation.getType())
+                            .serviceName(recommendation.getServiceName())
+                            .price(recommendation.getPrice())
+                            .benefit1(recommendation.getBenefit1())
+                            .benefit2(recommendation.getBenefit2())
+                            .benefit3(recommendation.getBenefit3())
+                            .userAnswer(recommendation.getUserAnswer())
+                            .createdAt(recommendation.getCreatedAt())
+                            .build())
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(responseDtos);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseBuilder.databaseErrorForList();
+        }
+    }
+
+    public ResponseEntity<?> deleteRecommendationById(Long recommendationId) {
+        try {
+            // 인증된 사용자
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);   // 인증되지 않은 경우
+            }
+
+            User user = userService.getUserByUserId(authentication.getName());
+
+            RecommendationResult recommendationResult = recommendationResultRepository.findById(recommendationId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "추쳔 결과가 존재하지 않습니다"));
+
+            // 삭제하려는 추천 결과가 현재 사용자의 것인지 확인
+            if (!recommendationResult.getUser().equals(user)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("자신의 추천 결과만 삭제할 수 있습니다.");
+            }
+
+            recommendationResultRepository.delete(recommendationResult);
+            return ResponseEntity.ok("추천 결과가 삭제되었습니다.");
+
+        } catch (ResponseStatusException e) {
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseBuilder.databaseError();
         }
     }
 }
