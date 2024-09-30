@@ -44,6 +44,9 @@ public class RecommendationResult {
     @Column(name = "benefit_3", length = 100)
     private String benefit3;
 
+    @Column(name = "user_answer", length = 255)
+    private String userAnswer;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }
