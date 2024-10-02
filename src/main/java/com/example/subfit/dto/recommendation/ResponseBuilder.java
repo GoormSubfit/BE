@@ -7,7 +7,7 @@ import java.util.List;
 
 public class ResponseBuilder {
 
-    public static ResponseEntity<RecommendationResponseDto> success(RecommendationResponseDto responseBody) {
+    public static ResponseEntity<RecommendationWithComparisonResponseDto> success(RecommendationWithComparisonResponseDto responseBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
     }
 
@@ -15,15 +15,15 @@ public class ResponseBuilder {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
+    public static ResponseEntity<RecommendationWithComparisonResponseDto> databaseErrorForRecommendation() {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
     public static ResponseEntity<List<RecommendationResponseDto>> databaseErrorForList() {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    public static ResponseEntity<RecommendationResponseDto> badRequest() {
+    public static ResponseEntity<RecommendationWithComparisonResponseDto> badRequest() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
-
-    public static ResponseEntity<RecommendationResponseDto> serviceUnavailable() {
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
     }
 }

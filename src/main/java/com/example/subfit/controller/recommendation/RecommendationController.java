@@ -2,6 +2,7 @@ package com.example.subfit.controller.recommendation;
 
 import com.example.subfit.dto.recommendation.RecommendationRequestDto;
 import com.example.subfit.dto.recommendation.RecommendationResponseDto;
+import com.example.subfit.dto.recommendation.RecommendationWithComparisonResponseDto;
 import com.example.subfit.service.recommendation.RecommendationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class RecommendationController {
 
     // 추천 결과 생성
     @PostMapping("/create")
-    public ResponseEntity<RecommendationResponseDto> generateRecommendation(@Valid @RequestBody RecommendationRequestDto recommendationRequestDto) {
+    public ResponseEntity<RecommendationWithComparisonResponseDto> generateRecommendation(@Valid @RequestBody RecommendationRequestDto recommendationRequestDto) {
         return recommendationService.generateRecommendation(recommendationRequestDto);
     }
 
