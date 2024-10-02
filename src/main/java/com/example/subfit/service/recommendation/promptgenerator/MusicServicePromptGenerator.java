@@ -62,7 +62,7 @@ public class MusicServicePromptGenerator implements ServicePromptGenerator {
                 prompt.append("Special Benefit: ").append(service.getSpecialBenefit()).append("\n\n");
             }
         }
-        // JSON 형식에 대한 명확한 지시
+
         prompt.append("서비스 이름은 '스포티파이', '멜론', '애플 뮤직', '유튜브 뮤직', '벅스', '플로', '지니뮤직', '네이버 Vibe', '유튜브 프리미엄' 중 하나야.\n");
         prompt.append("추천된 서비스를 제외하고 나머지 서비스들의 가격과 혜택 2가지를 간단하게 알려줘. 응답은 반드시 **JSON 형식**으로 해줘. 아래 형식을 따르고, 절대로 코드 블록이나 추가적인 설명을 넣지 말아줘:\n");
         prompt.append("'추천 서비스 리스트' : [{ '추천 서비스': '서비스 이름', '가격': '가격', '혜택 1': '혜택 설명', '혜택 2': '혜택 설명' },");
