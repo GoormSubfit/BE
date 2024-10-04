@@ -45,7 +45,7 @@ public class OTTServicePromptGenerator implements ServicePromptGenerator {
         StringBuilder prompt = new StringBuilder();
         List<OTTService> ottServices = ottServiceRepository.findAll();
 
-        prompt.append("추천된 서비스 '").append(excludedService).append("'를 제외한 클라우드 서비스들의 내용이야:\n");
+        prompt.append("추천된 서비스 '").append(excludedService).append("'를 제외한 OTT 서비스들의 내용이야:\n");
         for (OTTService service : ottServices) {
             if (!service.getName().equals(excludedService)) {
                 prompt.append("Service Name: ").append(service.getName()).append("\n");
