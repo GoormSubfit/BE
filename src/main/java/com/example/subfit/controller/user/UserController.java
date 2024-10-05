@@ -5,6 +5,7 @@ import com.example.subfit.dto.user.UserRegistrationDto;
 import com.example.subfit.entity.user.User;
 import com.example.subfit.security.JwtTokenProvider;
 import com.example.subfit.service.user.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,8 +48,14 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> registerUser(
-            @ModelAttribute UserRegistrationDto userRegistrationDto,
+            @Valid @ModelAttribute UserRegistrationDto userRegistrationDto,
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImageFile) {
+
+        if (!userService.isUserIdAvailable(userRegistrationDto.getUserId())) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "이미 사용 중인 아이디입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        }
 
         userService.registerUser(userRegistrationDto, profileImageFile);
         Map<String, String> response = new HashMap<>();
